@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/jonboulle/clockwork"
-	"github.com/russellhaering/gosaml2"
+	"github.com/rmh-media/gosaml2"
 	"github.com/russellhaering/goxmldsig"
 )
 
