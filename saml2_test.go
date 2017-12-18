@@ -10,7 +10,7 @@ import (
 	"log"
 	"testing"
 
-	"github.com/russellhaering/gosaml2/types"
+	"github.com/rmh-media/gosaml2/types"
 	"github.com/stretchr/testify/require"
 )
 
