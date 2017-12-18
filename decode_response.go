@@ -12,9 +12,9 @@ import (
 	"encoding/xml"
 
 	"github.com/beevik/etree"
+	"github.com/rmh-media/gosaml2/types"
 	dsig "github.com/russellhaering/goxmldsig"
 	"github.com/russellhaering/goxmldsig/etreeutils"
-	"github.com/russellhaering/rmh-media/types"
 )
 
 func (sp *SAMLServiceProvider) validationContext() *dsig.ValidationContext {
