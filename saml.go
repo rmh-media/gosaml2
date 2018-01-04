@@ -49,6 +49,9 @@ type SAMLServiceProvider struct {
 	Clock                   *dsig.Clock
 	signingContextMu        sync.RWMutex
 	signingContext          *dsig.SigningContext
+
+	Organization  *types.Organization
+	ContactPerson *types.ContactPerson
 }
 
 // RequestedAuthnContext controls which authentication mechanisms are requested of
@@ -76,45 +79,59 @@ func (sp *SAMLServiceProvider) Metadata() (*types.EntityDescriptor, error) {
 	if err != nil {
 		return nil, err
 	}
+	if sp.NameIdFormat == "" {
+		sp.NameIdFormat = "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified"
+	}
+
 	return &types.EntityDescriptor{
 		ValidUntil: time.Now().UTC().Add(time.Hour * 24 * 7), // 7 days
 		EntityID:   sp.ServiceProviderIssuer,
-		SPSSODescriptor: types.SPSSODescriptor{
-			AuthnRequestsSigned:        sp.SignAuthnRequests,
-			WantAssertionsSigned:       !sp.SkipSignatureValidation,
-			ProtocolSupportEnumeration: SAMLProtocolNamespace,
-			KeyDescriptors: []types.KeyDescriptor{
-				{
-					Use: "signing",
-					KeyInfo: dsigtypes.KeyInfo{
-						X509Data: dsigtypes.X509Data{
-							X509Certificate: dsigtypes.X509Certificate{
-								Data: base64.StdEncoding.EncodeToString(signingCertBytes),
+		SPSSODescriptors: []types.SPSSODescriptor{
+			{
+				AuthnRequestsSigned:        sp.SignAuthnRequests,
+				WantAssertionsSigned:       !sp.SkipSignatureValidation,
+				ProtocolSupportEnumeration: SAMLProtocolNamespace,
+				KeyDescriptors: []types.KeyDescriptor{
+					{
+						Use: "signing",
+						KeyInfo: dsigtypes.KeyInfo{
+							X509Data: dsigtypes.X509Data{
+								X509Certificate: dsigtypes.X509Certificate{
+									Data: base64.StdEncoding.EncodeToString(signingCertBytes),
+								},
 							},
 						},
 					},
-				},
-				{
-					Use: "encryption",
-					KeyInfo: dsigtypes.KeyInfo{
-						X509Data: dsigtypes.X509Data{
-							X509Certificate: dsigtypes.X509Certificate{
-								Data: base64.StdEncoding.EncodeToString(encryptionCertBytes),
+					{
+						Use: "encryption",
+						KeyInfo: dsigtypes.KeyInfo{
+							X509Data: dsigtypes.X509Data{
+								X509Certificate: dsigtypes.X509Certificate{
+									Data: base64.StdEncoding.EncodeToString(encryptionCertBytes),
+								},
 							},
 						},
-					},
-					EncryptionMethods: []types.EncryptionMethod{
-						{Algorithm: types.MethodAES128GCM},
-						{Algorithm: types.MethodAES128CBC},
-						{Algorithm: types.MethodAES256CBC},
+						EncryptionMethods: []types.EncryptionMethod{
+							{Algorithm: types.MethodAES128GCM},
+							{Algorithm: types.MethodAES128CBC},
+							{Algorithm: types.MethodAES256CBC},
+						},
 					},
 				},
+				AssertionConsumerServices: []types.IndexedEndpoint{{
+					Binding:  BindingHttpPost,
+					Location: sp.AssertionConsumerServiceURL,
+					Index:    1,
+				}},
+				NameIDFormat: sp.NameIdFormat,
 			},
-			AssertionConsumerServices: []types.IndexedEndpoint{{
-				Binding:  BindingHttpPost,
-				Location: sp.AssertionConsumerServiceURL,
-				Index:    1,
-			}},
+		},
+		Organization:  sp.Organization,
+		ContactPerson: sp.ContactPerson,
+		DigestMethod: []types.DigestMethod{
+			{Algorithm: types.MethodSHA1},
+			{Algorithm: types.MethodSHA256},
+			{Algorithm: types.MethodSHA512},
 		},
 	}, nil
 }
