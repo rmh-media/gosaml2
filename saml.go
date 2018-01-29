@@ -86,45 +86,43 @@ func (sp *SAMLServiceProvider) Metadata() (*types.EntityDescriptor, error) {
 	return &types.EntityDescriptor{
 		ValidUntil: time.Now().UTC().Add(time.Hour * 24 * 7), // 7 days
 		EntityID:   sp.ServiceProviderIssuer,
-		SPSSODescriptors: []types.SPSSODescriptor{
-			{
-				AuthnRequestsSigned:        sp.SignAuthnRequests,
-				WantAssertionsSigned:       !sp.SkipSignatureValidation,
-				ProtocolSupportEnumeration: SAMLProtocolNamespace,
-				KeyDescriptors: []types.KeyDescriptor{
-					{
-						Use: "signing",
-						KeyInfo: dsigtypes.KeyInfo{
-							X509Data: dsigtypes.X509Data{
-								X509Certificate: dsigtypes.X509Certificate{
-									Data: base64.StdEncoding.EncodeToString(signingCertBytes),
-								},
-							},
-						},
-					},
-					{
-						Use: "encryption",
-						KeyInfo: dsigtypes.KeyInfo{
-							X509Data: dsigtypes.X509Data{
-								X509Certificate: dsigtypes.X509Certificate{
-									Data: base64.StdEncoding.EncodeToString(encryptionCertBytes),
-								},
-							},
-						},
-						EncryptionMethods: []types.EncryptionMethod{
-							{Algorithm: types.MethodAES128GCM},
-							{Algorithm: types.MethodAES128CBC},
-							{Algorithm: types.MethodAES256CBC},
+		SPSSODescriptor: types.SPSSODescriptor{
+			AuthnRequestsSigned:        sp.SignAuthnRequests,
+			WantAssertionsSigned:       !sp.SkipSignatureValidation,
+			ProtocolSupportEnumeration: SAMLProtocolNamespace,
+			KeyDescriptors: []types.KeyDescriptor{
+				{
+					Use: "signing",
+					KeyInfo: dsigtypes.KeyInfo{
+						X509Data: dsigtypes.X509Data{
+							X509Certificates: []dsigtypes.X509Certificate{dsigtypes.X509Certificate{
+								Data: base64.StdEncoding.EncodeToString(signingCertBytes),
+							}},
 						},
 					},
 				},
-				AssertionConsumerServices: []types.IndexedEndpoint{{
-					Binding:  BindingHttpPost,
-					Location: sp.AssertionConsumerServiceURL,
-					Index:    1,
-				}},
-				NameIDFormat: sp.NameIdFormat,
+				{
+					Use: "encryption",
+					KeyInfo: dsigtypes.KeyInfo{
+						X509Data: dsigtypes.X509Data{
+							X509Certificates: []dsigtypes.X509Certificate{dsigtypes.X509Certificate{
+								Data: base64.StdEncoding.EncodeToString(encryptionCertBytes),
+							}},
+						},
+					},
+					EncryptionMethods: []types.EncryptionMethod{
+						{Algorithm: types.MethodAES128GCM},
+						{Algorithm: types.MethodAES128CBC},
+						{Algorithm: types.MethodAES256CBC},
+					},
+				},
 			},
+			AssertionConsumerServices: []types.IndexedEndpoint{{
+				Binding:  BindingHttpPost,
+				Location: sp.AssertionConsumerServiceURL,
+				Index:    1,
+			}},
+			NameIDFormat: sp.NameIdFormat,
 		},
 		Organization:  sp.Organization,
 		ContactPerson: sp.ContactPerson,

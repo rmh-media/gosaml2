@@ -11,12 +11,12 @@ type EntityDescriptor struct {
 	XMLName    xml.Name  `xml:"urn:oasis:names:tc:SAML:2.0:metadata EntityDescriptor"`
 	ValidUntil time.Time `xml:"validUntil,attr"`
 	// SAML 2.0 8.3.6 Entity Identifier could be used to represent issuer
-	EntityID          string             `xml:"entityID,attr"`
-	SPSSODescriptors  []SPSSODescriptor  `xml:"SPSSODescriptor"`
-	IDPSSODescriptors []IDPSSODescriptor `xml:"IDPSSODescriptor,omitempty"`
-	Organization      *Organization      `xml:"urn:oasis:names:tc:SAML:2.0:metadata Organization,omitempty"`
-	ContactPerson     *ContactPerson     `xml:"urn:oasis:names:tc:SAML:2.0:metadata ContactPerson,omitempty"`
-	DigestMethod      []DigestMethod     `xml:"urn:oasis:names:tc:SAML:metadata:algsupport DigestMethod"`
+	EntityID         string           `xml:"entityID,attr"`
+	SPSSODescriptor  SPSSODescriptor  `xml:"SPSSODescriptor"`
+	IDPSSODescriptor IDPSSODescriptor `xml:"IDPSSODescriptor,omitempty"`
+	Organization     *Organization    `xml:"urn:oasis:names:tc:SAML:2.0:metadata Organization,omitempty"`
+	ContactPerson    *ContactPerson   `xml:"urn:oasis:names:tc:SAML:2.0:metadata ContactPerson,omitempty"`
+	DigestMethod     []DigestMethod   `xml:"urn:oasis:names:tc:SAML:metadata:algsupport DigestMethod"`
 }
 
 type Endpoint struct {
